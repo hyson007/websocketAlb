@@ -27,9 +27,13 @@ func main() {
 	done := make(chan struct{})
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
+	numberToPrint := 10
+	count := 0
+	var sumServerTime int64 = 0
 
 	go func() {
 		for {
+
 			if err := conn.ReadJSON(&response); err != nil {
 				fmt.Println(err)
 				close(done)
@@ -40,8 +44,14 @@ func main() {
 			// localTime := time.Now()
 
 			timeDiff := time.Since(serverTime).Microseconds()
+			sumServerTime += timeDiff
+			count++
 
-			fmt.Printf("Server Source Port:%d Time difference: %v\n", response.SourcePort, timeDiff)
+			if count == numberToPrint {
+				fmt.Printf("Server Source Port:%d, average server to client latency: %v\n", response.SourcePort, timeDiff/int64(numberToPrint))
+				count = 0
+				sumServerTime = 0
+			}
 		}
 	}()
 
