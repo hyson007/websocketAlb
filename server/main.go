@@ -16,10 +16,17 @@ var upgrader = websocket.Upgrader{
 }
 
 func main() {
+	http.HandleFunc("/", handleRoot)
 	http.HandleFunc("/ws", handleWebSocket)
-	log.Println("websocket listening...")
-	http.ListenAndServe(":8080", nil)
+	log.Println("http server listening...")
+	err := http.ListenAndServe(":8080", nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
 
+func handleRoot(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "hello world")
 }
 
 func handleWebSocket(w http.ResponseWriter, r *http.Request) {
